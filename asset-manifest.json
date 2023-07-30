@@ -1,21 +1,21 @@
 {
   "files": {
-    "main.css": "/static/css/main.4486a413.css",
-    "main.js": "/static/js/main.7ccdf15e.js",
-    "static/js/787.28525a86.chunk.js": "/static/js/787.28525a86.chunk.js",
-    "static/media/Exhibition_1.jpg": "/static/media/Exhibition_1.2cdd6bad4b5fb40c2878.jpg",
-    "static/media/Exhibition_2.jpg": "/static/media/Exhibition_2.c1e2d83bda58ba31c9e7.jpg",
-    "static/media/concr-transformed.jpeg": "/static/media/concr-transformed.4215ee67296a9014de7b.jpeg",
-    "static/media/hero_img_2.jpg": "/static/media/hero_img_2.6d709713b781092965e6.jpg",
-    "static/media/image003.png": "/static/media/image003.82e83662ccd437cf7e7c.png",
-    "static/media/no-image.jpg": "/static/media/no-image.7365e6d019d05890e07a.jpg",
-    "index.html": "/index.html",
-    "main.4486a413.css.map": "/static/css/main.4486a413.css.map",
-    "main.7ccdf15e.js.map": "/static/js/main.7ccdf15e.js.map",
-    "787.28525a86.chunk.js.map": "/static/js/787.28525a86.chunk.js.map"
+    "main.css": "/minsteel-landing-public/static/css/main.4486a413.css",
+    "main.js": "/minsteel-landing-public/static/js/main.0eedb45f.js",
+    "static/js/787.28525a86.chunk.js": "/minsteel-landing-public/static/js/787.28525a86.chunk.js",
+    "static/media/Exhibition_1.jpg": "/minsteel-landing-public/static/media/Exhibition_1.2cdd6bad4b5fb40c2878.jpg",
+    "static/media/Exhibition_2.jpg": "/minsteel-landing-public/static/media/Exhibition_2.c1e2d83bda58ba31c9e7.jpg",
+    "static/media/concr-transformed.jpeg": "/minsteel-landing-public/static/media/concr-transformed.4215ee67296a9014de7b.jpeg",
+    "static/media/hero_img_2.jpg": "/minsteel-landing-public/static/media/hero_img_2.6d709713b781092965e6.jpg",
+    "static/media/image003.png": "/minsteel-landing-public/static/media/image003.82e83662ccd437cf7e7c.png",
+    "static/media/no-image.jpg": "/minsteel-landing-public/static/media/no-image.7365e6d019d05890e07a.jpg",
+    "index.html": "/minsteel-landing-public/index.html",
+    "main.4486a413.css.map": "/minsteel-landing-public/static/css/main.4486a413.css.map",
+    "main.0eedb45f.js.map": "/minsteel-landing-public/static/js/main.0eedb45f.js.map",
+    "787.28525a86.chunk.js.map": "/minsteel-landing-public/static/js/787.28525a86.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.4486a413.css",
-    "static/js/main.7ccdf15e.js"
+    "static/js/main.0eedb45f.js"
   ]
 }
