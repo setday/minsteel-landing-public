@@ -1,0 +1,11 @@
+---
+import { withBase } from '../lib/url';
+import Base from '../layouts/Base.astro';
+---
+<Base title="Страница не найдена — МинСтил" description="Такой страницы нет." noindex>
+  <section class="section"><div class="container" style="min-height:50vh; display:grid; align-content:center; gap:20px">
+    <h1>Страница не найдена</h1>
+    <p class="lead">Возможно, вы пришли по старой ссылке.</p>
+    <div class="btn-row"><a class="btn btn--primary" href={withBase()}>На главную</a></div>
+  </div></section>
+</Base>

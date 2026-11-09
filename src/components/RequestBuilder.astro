@@ -1,0 +1,61 @@
+---
+import { products } from '../data/catalog';
+import { site } from '../data/site';
+import Icon from './Icon.astro';
+const volumes = ['до 5 т', '5–20 т', '20–100 т', 'более 100 т', 'по спецификации'];
+const { telegram, whatsapp } = site.messengers;
+---
+<form class="rb" data-request-builder data-email={site.email} data-telegram={telegram ?? ''} data-whatsapp={whatsapp ?? ''} novalidate>
+  <fieldset class="rb__group">
+    <legend>Что нужно</legend>
+    <div class="rb__checks">
+      {products.map((p) => (
+        <label class="rb__check"><input type="checkbox" name="cat" value={p.title} data-slug={p.slug} /> <span>{p.title}</span></label>
+      ))}
+    </div>
+  </fieldset>
+  <div class="rb__row">
+    <label class="rb__field">
+      <span>Объём</span>
+      <select name="volume">
+        <option value="">не указан</option>
+        {volumes.map((v) => <option value={v}>{v}</option>)}
+      </select>
+    </label>
+    <label class="rb__field">
+      <span>Город доставки</span>
+      <input name="city" type="text" autocomplete="off" maxlength="80" placeholder="Например, Череповец" />
+    </label>
+  </div>
+  <label class="rb__field">
+    <span>Комментарий</span>
+    <textarea name="comment" rows="3" maxlength="1200" placeholder="Марка, фракция, фасовка, сроки"></textarea>
+  </label>
+  <div class="rb__error" role="alert" hidden>Отметьте позицию или напишите комментарий.</div>
+  <div class="btn-row">
+    <button type="submit" class="btn btn--primary" data-channel="mail"><Icon name="mail" /> Составить письмо</button>
+    {telegram && <button type="button" class="btn" data-channel="telegram"><Icon name="telegram" /> Telegram</button>}
+    {whatsapp && <button type="button" class="btn" data-channel="whatsapp"><Icon name="whatsapp" /> WhatsApp</button>}
+    <button type="button" class="btn" data-channel="copy"><Icon name="copy" /> <span data-copy-label>Скопировать текст</span></button>
+  </div>
+  <p class="rb__note muted">Откроется ваша почта с готовым письмом — ТЗ или спецификацию можно приложить к нему. Сайт не собирает и не хранит ваши данные.</p>
+  <pre class="sr-only" data-preview aria-hidden="true"></pre>
+</form>
+
+<style>
+  .rb { display: grid; gap: 22px; }
+  .rb__group { border: 0; margin: 0; padding: 0; min-width: 0; }
+  .rb legend, .rb__field > span { font-weight: 600; font-size: var(--fs-sm); margin-bottom: 10px; padding: 0; display: block; }
+  .rb__checks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 20px; }
+  @media (max-width: 520px) { .rb__checks { grid-template-columns: 1fr; } }
+  .rb__check { display: flex; align-items: center; gap: 10px; font-size: var(--fs-sm); cursor: pointer; min-height: 28px; }
+  .rb__check input { width: 18px; height: 18px; accent-color: var(--accent); margin: 0; flex: none; }
+  .rb__row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 520px) { .rb__row { grid-template-columns: 1fr; } }
+  .rb__field { display: grid; min-width: 0; }
+  .rb__field :is(input, select, textarea) { width: 100%; min-height: 46px; padding: 11px 12px; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--surface); color: var(--text); font: inherit; resize: vertical; }
+  .rb__field :is(input, select, textarea):focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .rb__error { color: var(--err); font-size: var(--fs-sm); }
+  .rb__note { font-size: var(--fs-sm); margin: 0; }
+  @media (max-width: 520px) { .rb .btn { width: 100%; } }
+</style>

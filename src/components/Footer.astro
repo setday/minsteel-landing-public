@@ -1,0 +1,17 @@
+---
+import { withBase } from '../lib/url';
+import Logo from './Logo.astro';
+import { site } from '../data/site';
+const year = new Date().getFullYear();
+const r = site.requisites;
+---
+<footer class="site-footer">
+  <div class="container site-footer__inner">
+    <Logo />
+    <div class="footer-meta">
+      <span>© {site.since}–{year} {site.legalName}</span>
+      <span>ИНН/КПП {r.inn}/{r.kpp} · ОГРН {r.ogrn}</span>
+    </div>
+    <a href={withBase('privacy/')}>Конфиденциальность</a>
+  </div>
+</footer>

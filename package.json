@@ -1,0 +1,23 @@
+{
+  "name": "minsteel-site",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "render:materials": "/Applications/Blender.app/Contents/MacOS/Blender -b -P tools/blender/render_materials.py --"
+  },
+  "dependencies": {
+    "@fontsource-variable/manrope": "5.3.0",
+    "astro": "7.4.5",
+    "three": "0.187.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.12",
+    "@types/node": "24.19.2",
+    "@types/three": "0.187.0",
+    "typescript": "6.0.3"
+  }
+}

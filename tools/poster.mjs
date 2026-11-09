@@ -1,0 +1,31 @@
+// Статичный кадр 3D-героя с прозрачным фоном: node tools/poster.mjs <url> <out.png>
+import { spawn } from 'node:child_process';
+import { writeFileSync, mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+const [url, out] = process.argv.slice(2);
+const proc = spawn('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', ['--headless=new', '--remote-debugging-port=0', `--user-data-dir=${mkdtempSync(join(tmpdir(), 'pst-'))}`, '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--window-size=1440,900', 'about:blank']);
+const wsUrl = await new Promise((res) => proc.stderr.on('data', (d) => { const m = String(d).match(/ws:\/\/[^\s]+/); if (m) res(m[0]); }));
+const ws = new WebSocket(wsUrl); await new Promise((r) => ws.addEventListener('open', r));
+let id = 0; const pending = new Map();
+ws.addEventListener('message', (e) => { const m = JSON.parse(e.data); if (m.id && pending.has(m.id)) { pending.get(m.id)(m); pending.delete(m.id); } });
+const send = (method, params = {}, sessionId) => new Promise((r) => { const i = ++id; pending.set(i, r); ws.send(JSON.stringify({ id: i, method, params, sessionId })); });
+const { result: { targetId } } = await send('Target.createTarget', { url: 'about:blank' });
+const { result: { sessionId } } = await send('Target.attachToTarget', { targetId, flatten: true });
+const s = (m, p) => send(m, p, sessionId);
+await s('Emulation.setDeviceMetricsOverride', { width: 1440, height: 900, deviceScaleFactor: 2, mobile: false });
+await s('Emulation.setDefaultBackgroundColorOverride', { color: { r: 0, g: 0, b: 0, a: 0 } });
+await s('Page.enable'); await s('Runtime.enable');
+await s('Page.navigate', { url });
+await new Promise((r) => setTimeout(r, 6000));
+const r = await s('Runtime.evaluate', { returnByValue: true, expression: `(() => {
+  const st = document.createElement('style');
+  st.textContent = 'html,body,.hero,.site-header{background:transparent!important} body *{visibility:hidden} .hero__canvas{visibility:visible!important;opacity:1!important;transition:none!important}';
+  document.head.append(st);
+  return JSON.stringify(document.querySelector('.hero__canvas').getBoundingClientRect());
+})()` });
+await new Promise((r) => setTimeout(r, 300));
+const b = JSON.parse(r.result.result.value);
+const c = await s('Page.captureScreenshot', { format: 'png', clip: { x: b.x, y: b.y, width: b.width, height: b.height, scale: 1 } });
+writeFileSync(out, Buffer.from(c.result.data, 'base64'));
+ws.close(); proc.kill();

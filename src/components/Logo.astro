@@ -1,0 +1,13 @@
+---
+import { withBase } from '../lib/url';
+import LogoMark from './LogoMark.astro';
+interface Props { descriptor?: boolean; }
+const { descriptor = true } = Astro.props;
+---
+<a class="logo" href={withBase()} aria-label="МинСтил — на главную">
+  <LogoMark class="logo__mark" />
+  <span class="logo__text">
+    <span class="logo__word">МИНСТИЛ</span>
+    {descriptor && <span class="logo__desc">ОГНЕУПОРНЫЕ МАТЕРИАЛЫ</span>}
+  </span>
+</a>

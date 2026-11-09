@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.astro/
+.env
+.DS_Store
+# Внутренние заметки и логи — не для публичного репозитория
+PLAN.md
+tools/codex/*.log
+tools/codex/*.out

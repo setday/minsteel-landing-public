@@ -1,0 +1,34 @@
+// Проверка конструктора запроса: node tools/test-request.mjs <base-url> <out.png>
+import { spawn } from 'node:child_process';
+import { writeFileSync, mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+const [base, out] = process.argv.slice(2);
+const proc = spawn('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', ['--headless=new', '--remote-debugging-port=0', `--user-data-dir=${mkdtempSync(join(tmpdir(), 'rq-'))}`, '--window-size=1440,900', 'about:blank']);
+const wsUrl = await new Promise((res) => proc.stderr.on('data', (d) => { const m = String(d).match(/ws:\/\/[^\s]+/); if (m) res(m[0]); }));
+const ws = new WebSocket(wsUrl); await new Promise((r) => ws.addEventListener('open', r));
+let id = 0; const pending = new Map(); const events = [];
+ws.addEventListener('message', (e) => { const m = JSON.parse(e.data); if (m.id && pending.has(m.id)) { pending.get(m.id)(m); pending.delete(m.id); } else if (m.method) events.push(m); });
+const send = (method, params = {}, sessionId) => new Promise((r) => { const i = ++id; pending.set(i, r); ws.send(JSON.stringify({ id: i, method, params, sessionId })); });
+const { result: { targetId } } = await send('Target.createTarget', { url: 'about:blank' });
+const { result: { sessionId } } = await send('Target.attachToTarget', { targetId, flatten: true });
+const s = (m, p) => send(m, p, sessionId);
+const ev = async (expr) => (await s('Runtime.evaluate', { expression: expr, returnByValue: true, awaitPromise: true })).result.result.value;
+await s('Emulation.setDeviceMetricsOverride', { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
+await s('Page.enable'); await s('Runtime.enable');
+await s('Page.navigate', { url: `${base}/catalog/anchors/` });
+await new Promise((r) => setTimeout(r, 2500));
+const res = {};
+res.open = await ev(`(() => { document.querySelector('.page-hero [data-open-request]').click(); return document.querySelector('#request-dialog').open; })()`);
+await new Promise((r) => setTimeout(r, 400));
+res.preselected = await ev(`[...document.querySelectorAll('#request-dialog input[name=cat]:checked')].map(i => i.dataset.slug)`);
+await ev(`(() => { const f = document.querySelector('#request-dialog form'); f.querySelector('input[name=volume][value="5–20 т"]').click(); f.querySelector('input[name=city]').value = 'Череповец'; f.querySelector('input[name=city]').dispatchEvent(new Event('input', {bubbles:true})); })()`);
+res.preview = await ev(`document.querySelector('#request-dialog [data-preview]').textContent`);
+await new Promise((r) => setTimeout(r, 300));
+const shot = await s('Page.captureScreenshot', { format: 'png' });
+writeFileSync(out, Buffer.from(shot.result.data, 'base64'));
+// Пустой запрос: сбрасываем выбор и жмём «Отправить»
+await ev(`(() => { const f = document.querySelector('#request-dialog form'); f.querySelectorAll('input[name=cat]').forEach(i => i.checked = false); f.dispatchEvent(new Event('change')); f.requestSubmit(); })()`);
+res.emptyError = await ev(`!document.querySelector('#request-dialog .rb__error').hidden`);
+console.log(JSON.stringify(res, null, 2));
+ws.close(); proc.kill();

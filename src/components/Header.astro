@@ -1,0 +1,29 @@
+---
+import { withBase } from '../lib/url';
+import Logo from './Logo.astro';
+import Icon from './Icon.astro';
+import { site } from '../data/site';
+const nav = [
+  { href: withBase('#products'), label: 'Продукция' },
+  { href: withBase('#about'), label: 'О компании' },
+  { href: withBase('#clients'), label: 'Клиенты' },
+  { href: withBase('#expo'), label: 'Выставки' },
+  { href: withBase('#contacts'), label: 'Контакты' },
+];
+---
+<header class="site-header">
+  <div class="container site-header__inner">
+    <Logo />
+    <nav class="site-nav" aria-label="Разделы">
+      {nav.map((n) => <a href={n.href}>{n.label}</a>)}
+    </nav>
+    <div class="header-contacts">
+      <a class="header-phone" href={`tel:${site.phones[0].tel}`}>{site.phones[0].display}</a>
+      <a class="btn btn--primary btn--sm" href={withBase('#contacts')} data-from="header">Запросить КП</a>
+    </div>
+  </div>
+</header>
+<nav class="mobile-bar" aria-label="Быстрая связь">
+  <a class="btn" href={`tel:${site.phones[0].tel}`}><Icon name="phone" /> Позвонить</a>
+  <a class="btn btn--primary" href={withBase('#contacts')}>Запросить КП</a>
+</nav>

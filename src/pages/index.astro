@@ -1,0 +1,184 @@
+---
+import { Picture, Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
+import RequestBuilder from '../components/RequestBuilder.astro';
+import Icon from '../components/Icon.astro';
+import { products } from '../data/catalog';
+import { clients, site } from '../data/site';
+import { exhibitions, expoSource } from '../data/exhibitions';
+
+const images = import.meta.glob<{ default: ImageMetadata }>('../assets/products/*.{png,jpg,jpeg,webp}', { eager: true });
+const logos = import.meta.glob<{ default: ImageMetadata }>('../assets/clients/*', { eager: true });
+const logoFor = (file: string | null) => (file ? logos[`../assets/clients/${file}`]?.default : undefined);
+const expoImgs = import.meta.glob<{ default: ImageMetadata }>('../assets/expo/*', { eager: true });
+const expoFor = (file: string) => expoImgs[`../assets/expo/${file}`].default;
+const imageFor = (slug: string) => Object.entries(images).find(([k]) => k.split('/').pop()!.replace(/\.\w+$/, '') === slug)?.[1].default;
+
+const points = [
+  { t: 'Подбор под заказ', d: 'Под каждый запрос ищем производителя нужной марки — отечественного или зарубежного. Цена в КП актуальна на дату запроса.' },
+  { t: 'Всё для футеровки', d: 'Сырьё, бетоны, анкеры и изделия у одного поставщика — меньше договоров и согласований.' },
+  { t: 'Обязательства', d: 'Соблюдаем сроки, качество и стоимость поставок. С каждой партией — паспорт качества производителя.' },
+  { t: 'Рекомендации', d: 'По запросу дадим контакты представителей наших клиентов, чтобы вы узнали о нашей работе напрямую.' },
+];
+---
+<Base
+  title="МинСтил — сырьё и материалы для огнеупорной промышленности"
+  description="Боксит кальцинированный, андалузит, муллит, ПЭК, огнеупорные бетоны и анкерные крепления. Подбор производителя под заказ, поставки по России с 2010 года."
+>
+  <Hero />
+
+  <section class="section" id="products">
+    <div class="container">
+      <div class="section-head" data-reveal>
+        <span class="kicker">Продукция</span>
+        <h2>Сырьё для огнеупоров и материалы для футеровки</h2>
+        <p class="lead">Поставляем отечественные и импортные материалы. Марку, фракцию и фасовку подбираем под задачу — характеристики и паспорт качества присылаем вместе с КП.</p>
+      </div>
+      <div class="products">
+        {products.map((p) => {
+          const img = imageFor(p.slug);
+          return (
+            <a class="product" href="#contacts" data-request-pick={p.slug} data-reveal>
+              <div class="product__img">
+                {img ? <Picture src={img} alt={p.title} widths={[400, 640, 900]} sizes="(max-width: 600px) 100vw, (max-width: 960px) 50vw, 380px" formats={['avif', 'webp']} loading="lazy" /> : <div class="product__ph" />}
+              </div>
+              <div class="product__body">
+                <h3>{p.title}</h3>
+                <p class="muted">{p.text}</p>
+                <span class="product__cta">Запросить КП <Icon name="arrow" size={16} /></span>
+              </div>
+            </a>
+          );
+        })}
+      </div>
+      <p class="products__note muted">Изображения иллюстративные.</p>
+    </div>
+  </section>
+
+  <section class="section section--white" id="about">
+    <div class="container about">
+      <div data-reveal>
+        <span class="kicker">О компании</span>
+        <h2>Надёжный поставщик с {site.since} года</h2>
+        <p class="lead" style="margin-top:18px">{site.legalName} поставляет на российский рынок сырьё, оборудование и изделия для огнеупорной промышленности. Нашу продукцию используют в металлургии, электроэнергетике, нефтехимии и строительстве.</p>
+        <p class="muted">За время работы мы зарекомендовали себя как партнёр, который соблюдает обязательства по срокам, качеству и стоимости поставок. Это подтверждают рост объёмов поставок и список наших клиентов.</p>
+      </div>
+      <ol class="points" data-reveal>
+        {points.map((pt, i) => (
+          <li><span class="points__n">{String(i + 1).padStart(2, '0')}</span><div><h3>{pt.t}</h3><p class="muted">{pt.d}</p></div></li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" id="clients">
+    <div class="container">
+      <div class="section-head" data-reveal>
+        <span class="kicker">Клиенты и партнёры</span>
+        <h2>Нам доверяют</h2>
+      </div>
+      <ul class="clients" data-reveal>
+        {clients.map((c) => {
+          const logo = logoFor(c.logo);
+          return (
+            <li title={c.name}>
+              {logo ? <Image src={logo} alt={c.name} height={c.h} width={Math.round((logo.width / logo.height) * c.h)} densities={[1, 2]} loading="lazy" /> : <span class="clients__name">{c.short}</span>}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  </section>
+
+  {exhibitions.length > 0 && (
+    <section class="section section--white" id="expo">
+      <div class="container">
+        <div class="section-head" data-reveal>
+          <span class="kicker">Выставки и конференции</span>
+          <h2>Участвуем в «Металл-Экспо»</h2>
+          <p class="lead">Международная промышленная выставка «Металл-Экспо» в Санкт-Петербурге — главная встреча металлургической отрасли. Здесь мы встречаемся с клиентами и производителями материалов.</p>
+        </div>
+        <div class="expo" data-reveal>
+          {exhibitions.map((e, n) => (
+            <figure class:list={['expo__item', { 'expo__item--wide': n === 0 }]}>
+              <Picture src={expoFor(e.file)} alt={e.alt} widths={[480, 800, 1200]} sizes={n === 0 ? '(max-width: 760px) 100vw, 50vw' : '(max-width: 760px) 100vw, 25vw'} formats={['avif', 'webp']} loading="lazy" />
+            </figure>
+          ))}
+        </div>
+        <p class="expo__credit muted"><a href={expoSource.href} rel="noopener" target="_blank">{expoSource.label}</a></p>
+      </div>
+    </section>
+  )}
+
+  <section class="section section--white" id="contacts">
+    <div class="container contact">
+      <div data-reveal>
+        <span class="kicker">Контакты</span>
+        <h2>Запросите коммерческое предложение</h2>
+        <p class="lead" style="margin-top:16px">Опишите, что нужно, — подберём производителя и пришлём КП с ценой, сроком и логистикой.</p>
+        <dl class="contact__list">
+          <dt>Телефоны</dt>
+          <dd>{site.phones.map((p) => <a class="contact__big" href={`tel:${p.tel}`}>{p.display}</a>)}</dd>
+          <dt>Почта</dt>
+          <dd><a class="contact__big" href={`mailto:${site.email}`}>{site.email}</a></dd>
+          <dt>Реквизиты</dt>
+          <dd>{site.legalName}<br /><span class="muted" style="font-size:var(--fs-sm)">ИНН/КПП {site.requisites.inn}/{site.requisites.kpp} · ОГРН {site.requisites.ogrn}</span></dd>
+          <dt>Адрес для документов</dt>
+          <dd>{site.address}<br /><span class="muted" style="font-size:var(--fs-sm)">Офис не принимает посетителей — встречи по договорённости.</span></dd>
+        </dl>
+      </div>
+      <div class="contact__form" data-reveal>
+        <RequestBuilder />
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .products { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+  @media (max-width: 960px) { .products { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 600px) { .products { grid-template-columns: 1fr; } }
+  .product { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; text-decoration: none; color: var(--text); transition: border-color 0.2s, box-shadow 0.2s; }
+  .product:hover { color: var(--text); border-color: var(--line-strong); box-shadow: 0 12px 32px -18px rgb(28 26 24 / 0.35); }
+  .product__img { aspect-ratio: 3 / 2; background: #222; overflow: hidden; }
+  .product__img :global(img) { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
+  .product:hover .product__img :global(img) { transform: scale(1.03); }
+  .product__ph { width: 100%; height: 100%; background: linear-gradient(135deg, #2a2623, #1a1816); }
+  .product__body { display: grid; gap: 6px; padding: 18px 20px 20px; flex: 1; align-content: start; }
+  .product__body h3 { font-size: 1.0625rem; }
+  .product__body p { font-size: var(--fs-sm); margin: 0; }
+  .product__cta { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; font-size: var(--fs-sm); font-weight: 600; color: var(--accent); }
+  .products__note { font-size: 0.8125rem; margin: 16px 0 0; }
+
+  .about { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(32px, 6vw, 80px); align-items: start; }
+  @media (max-width: 860px) { .about { grid-template-columns: 1fr; } }
+  .points { list-style: none; display: grid; border-top: 1px solid var(--line); }
+  .points li { display: grid; grid-template-columns: 48px 1fr; gap: 12px; padding: 22px 0; border-bottom: 1px solid var(--line); }
+  .points__n { font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; padding-top: 2px; }
+  .points h3 { font-size: 1.0625rem; margin-bottom: 6px; }
+  .points p { margin: 0; font-size: var(--fs-sm); }
+
+  .clients { list-style: none; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  @media (max-width: 860px) { .clients { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .clients li { display: grid; place-items: center; text-align: center; min-height: 120px; padding: 20px; background: var(--surface); }
+  .clients li :global(img) { max-width: 100%; height: auto; }
+  .clients__name { font-weight: 800; letter-spacing: 0.08em; color: #6b645d; font-size: 1.0625rem; }
+  .expo { display: grid; grid-template-columns: 2fr 1fr 1fr; grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 12px; aspect-ratio: 2.4; }
+  .expo__item { margin: 0; border-radius: var(--radius); overflow: hidden; background: #ddd; min-height: 0; }
+  .expo__item--wide { grid-row: span 2; }
+  .expo__item:nth-child(4) { grid-column: 2 / span 2; }
+  .expo__item :global(img) { width: 100%; height: 100%; object-fit: cover; }
+  .expo__credit { font-size: 0.8125rem; margin: 12px 0 0; }
+  .expo__credit a { color: inherit; }
+  @media (max-width: 760px) { .expo { grid-template-columns: 1fr 1fr; grid-template-rows: auto; aspect-ratio: auto; } .expo__item, .expo__item:nth-child(4) { grid-column: auto; grid-row: auto; aspect-ratio: 3 / 2; } .expo__item--wide { grid-column: span 2; } }
+
+  .contact { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: clamp(32px, 6vw, 80px); align-items: start; }
+  @media (max-width: 900px) { .contact { grid-template-columns: 1fr; } }
+  .contact__list { display: grid; gap: 6px; margin: 32px 0 24px; }
+  .contact__list dt { font-size: var(--fs-sm); color: var(--muted); margin-top: 14px; }
+  .contact__list dd { margin: 0; }
+  .contact__big { display: block; font-size: 1.25rem; font-weight: 700; text-decoration: none; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  .contact__form { background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius); padding: clamp(20px, 3vw, 32px); }
+</style>

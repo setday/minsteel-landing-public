@@ -1,0 +1,16 @@
+---
+import Base from '../layouts/Base.astro';
+import { site } from '../data/site';
+---
+<Base title="Конфиденциальность — МинСтил" description="Сайт minsteel.info не собирает и не хранит персональные данные.">
+  <section class="section"><div class="container prose">
+    <h1>Конфиденциальность</h1>
+    <p class="lead" style="margin-top:16px">Сайт {site.domain} не собирает и не хранит персональные данные.</p>
+    <h2>Запросы</h2>
+    <p class="muted">На сайте нет форм, которые отправляют данные на сервер. Форма запроса только составляет текст письма в вашем браузере и открывает вашу почтовую программу. Письмо отправляете вы сами.</p>
+    <h2>Аналитика</h2>
+    <p class="muted">Для статистики посещаемости используется Яндекс.Метрика с обезличенными данными о посещениях.</p>
+    <h2>Связь</h2>
+    <p class="muted"><a href={`mailto:${site.email}`}>{site.email}</a></p>
+  </div></section>
+</Base>

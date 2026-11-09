@@ -1,0 +1,107 @@
+---
+import { Image } from 'astro:assets';
+import Icon from './Icon.astro';
+import poster from '../assets/hero-poster.png';
+import { site } from '../data/site';
+const layers = [
+  { id: 'bricks', t: 'Огнеупорные изделия' },
+  { id: 'castable', t: 'Огнеупорный бетон' },
+  { id: 'anchors', t: 'Анкерные крепления' },
+  { id: 'insulation', t: 'Теплоизоляция' },
+  { id: 'shell', t: 'Кожух агрегата' },
+];
+const facts = [
+  { t: `С ${site.since} года`, d: 'поставляем материалы для огнеупорной промышленности' },
+  { t: 'Под заказ', d: 'подбираем производителя под марку, объём и сроки' },
+  { t: 'По всей России', d: 'металлургия, энергетика, нефтехимия, строительство' },
+];
+---
+<section class="hero">
+  <div class="container hero__grid">
+    <div class="hero__text">
+      <h1>Сырьё и материалы для огнеупорной промышленности</h1>
+      <p class="hero__lead">Боксит, андалузит, муллит, ПЭК, огнеупорные бетоны и анкерные крепления. Подбираем производителя под ваш заказ и поставляем по России.</p>
+      <div class="btn-row">
+        <a class="btn btn--primary" href="#contacts" data-from="hero">Запросить КП <Icon name="arrow" /></a>
+        <a class="btn btn--light" href={`tel:${site.phones[0].tel}`}><Icon name="phone" /> {site.phones[0].display}</a>
+      </div>
+    </div>
+    <div class="hero__visual" aria-hidden="true">
+      <Image class="hero__poster" src={poster} alt="" widths={[560, 840, 1120]} sizes="(max-width: 860px) 100vw, 50vw" format="avif" loading="eager" fetchpriority="high" />
+      <canvas class="hero__canvas" data-hero-canvas></canvas>
+      <div class="hero__labels">
+        {layers.map((l) => <span class="hl" data-layer={l.id}>{l.t}</span>)}
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <ul class="hero__facts">
+      {facts.map((f) => <li><strong>{f.t}</strong><span>{f.d}</span></li>)}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .hero { background: radial-gradient(50% 70% at 78% 45%, rgb(160 70 20 / 0.18), transparent 70%), var(--dark); color: var(--dark-text); padding-top: clamp(40px, 6vw, 72px); }
+  .hero__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; align-items: center; }
+  .hero__text { display: grid; gap: 24px; padding-block: 24px; }
+  .hero h1 { max-width: 16ch; }
+  .hero__lead { color: var(--dark-muted); font-size: var(--fs-lg); max-width: 50ch; margin: 0; }
+  .hero__visual { position: relative; aspect-ratio: 1.15; }
+  .hero__poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+  .hero__poster { transition: opacity 0.6s ease; }
+  .hero__canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 0.6s ease; }
+  .hero__visual.is-live .hero__canvas { opacity: 1; }
+  .hero__visual.is-live .hero__poster { opacity: 0; }
+  .hero__labels { position: absolute; inset: 0; pointer-events: none; }
+  .hl { position: absolute; left: 0; top: 0; padding: 4px 9px; border-radius: 4px; background: rgb(22 20 18 / 0.82); border: 1px solid var(--dark-line); color: var(--dark-text); font-size: 0.75rem; font-weight: 600; white-space: nowrap; opacity: 0; transition: opacity 0.4s ease; translate: 8px -50%; }
+  .hl[data-visible='true'] { opacity: 1; }
+  .hero__facts { list-style: none; display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--dark-line); margin-top: clamp(24px, 4vw, 40px); }
+  .hero__facts li { display: grid; gap: 4px; padding: 24px 24px 32px 0; }
+  .hero__facts li + li { padding-left: 24px; border-left: 1px solid var(--dark-line); }
+  .hero__facts strong { font-size: var(--fs-lg); }
+  .hero__facts span { color: var(--dark-muted); font-size: var(--fs-sm); }
+  @media (max-width: 860px) {
+    .hero__grid { grid-template-columns: 1fr; gap: 0; }
+    .hero__visual { aspect-ratio: 1.4; margin-inline: calc(var(--gutter) * -1); }
+    .hero__facts { grid-template-columns: 1fr; margin-top: 0; }
+    .hero__facts li, .hero__facts li + li { padding: 16px 0; border-left: 0; }
+    .hero__facts li + li { border-top: 1px solid var(--dark-line); }
+  }
+</style>
+
+<script>
+  const canvas = document.querySelector<HTMLCanvasElement>('[data-hero-canvas]')!;
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Живое 3D — только на десктопе; на телефонах и при «уменьшить движение» остаётся статичный кадр
+  const desktop = matchMedia('(min-width: 861px) and (pointer: fine)').matches;
+  async function boot() {
+    if (!desktop || reduced) return;
+    const mod = await import('../scripts/lining3d');
+    if (!mod.webglAvailable()) return;
+    // Цикл без скролла: собрано → раскладка на слои → пауза → сборка
+    const CYCLE = 12000;
+    const ease = (x: number) => (x < 0.5 ? 2 * x * x : 1 - (-2 * x + 2) ** 2 / 2);
+    const t0 = performance.now();
+    const progress = () => {
+      const t = ((performance.now() - t0) % CYCLE) / CYCLE;
+      if (t < 0.22) return 0;
+      if (t < 0.4) return ease((t - 0.22) / 0.18);
+      if (t < 0.78) return 1;
+      if (t < 0.96) return 1 - ease((t - 0.78) / 0.18);
+      return 0;
+    };
+    const labels = [...document.querySelectorAll<HTMLElement>('.hero__labels .hl')];
+    const scene = mod.createLining({ canvas, labels, getProgress: progress, reducedMotion: reduced });
+    canvas.closest('.hero__visual')!.classList.add('is-live');
+    if (reduced) {
+      scene.renderOnce();
+      window.addEventListener('resize', () => scene.renderOnce());
+      return;
+    }
+    new IntersectionObserver(([e]) => (e.isIntersecting ? scene.start() : scene.stop())).observe(canvas);
+  }
+  const idle = (cb: () => void) => ('requestIdleCallback' in window ? requestIdleCallback(cb, { timeout: 1500 }) : setTimeout(cb, 300));
+  if (document.readyState === 'complete') idle(boot);
+  else window.addEventListener('load', () => idle(boot), { once: true });
+</script>
