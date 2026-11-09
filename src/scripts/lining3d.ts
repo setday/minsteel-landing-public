@@ -159,7 +159,7 @@ export function createLining(opts: Options) {
   (glow.material as THREE.SpriteMaterial).opacity = 0.55;
   root.add(glow);
 
-  // --- Сырьё: зёрна (боксит, андалузит, муллит, ПЭК) — облако частиц у бетона
+  // --- Сырьё: зёрна (боксит, андалузит, муллит, пек) — облако частиц у бетона
   const N = 900;
   const pos = new Float32Array(N * 3);
   const base = new Float32Array(N * 3);
